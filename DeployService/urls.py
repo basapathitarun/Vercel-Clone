@@ -21,4 +21,5 @@ from . import views
 
 urlpatterns = [
     path('index/', views.index),
+    path('deploy/',views.deploy),
 ]

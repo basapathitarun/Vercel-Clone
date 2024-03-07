@@ -32,8 +32,9 @@ def uploadAllfiles(Allfilename):
     for file in Allfilename:
         cur_dircetory = os.getcwd()
         cur_dircetory_len = len(cur_dircetory)
-        cur_dircetory_len+= len("vercel\\")
+        cur_dircetory_len+= len("vercel\output")
         s3_key = file[cur_dircetory_len:]
         s3_key = s3_key.replace('\\','/')
-        s3_key = s3_key[1:]
+        s3_key = s3_key[2:]
+        print(s3_key)
         s3.upload_file(file,os.getenv('BUCKET_NAME'),s3_key)

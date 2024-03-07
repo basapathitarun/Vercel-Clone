@@ -1,31 +1,36 @@
 import subprocess
 import os
+import shutil
 
-def build_project(id):
-    # Construct the directory path
-    directory_path = os.path.join(os.path.dirname(__file__), f"output\{id}")
+def buildReact(id):
+    # Define the source directory containing the project files
+    source_dir = os.path.join(os.path.dirname(__file__), f'output/{id}')
 
-    # Debugging: Print the constructed directory path
-    print("Constructed directory path:", directory_path)
+    # Execute npm install and npm run build in the source directory
+    command = f'cd {source_dir} && npm install && npm run build'
+    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-    # Execute the npm commands using subprocess with the specified working directory
-    try:
-        child = subprocess.Popen('install npm && npm build run', shell=True, cwd=directory_path, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    # Read stdout and stderr asynchronously
+    while True:
+        stdout = process.stdout.readline().decode('utf-8')
+        stderr = process.stderr.readline().decode('utf-8')
 
-        # Handle stdout
-        for line in child.stdout:
-            print('stdout:', line.decode().strip())
+        if process.poll() is not None and not stdout and not stderr:
+            break
 
-        # Handle stderr
-        for line in child.stderr:
-            print('stderr:', line.decode().strip())
+        if stdout:
+            print('stdout:', stdout.strip())
+        if stderr:
+            print('stderr:', stderr.strip())
 
-        # Wait for the process to finish and get the return code
-        code = child.wait()
+    # Define the destination directory where the build files should be moved
+    destination_dir = os.path.join(os.getcwd(), 'DeployService', 'Build', id)
 
-        print("Process completed with code:", code)
-    except Exception as e:
-        print("Error occurred:", e)
+    # Ensure that the destination directory does not exist
+    if os.path.exists(destination_dir):
+        shutil.rmtree(destination_dir)
 
-if __name__ == "__main__":
-    build_project("eK1Nm")
+    source_dir = os.path.join(source_dir,'dist')
+    # Move files and directories from source to destination
+    shutil.move(source_dir, destination_dir)
+
